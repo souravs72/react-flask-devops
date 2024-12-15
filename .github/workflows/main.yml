@@ -39,8 +39,20 @@ jobs:
           # Use rsync to copy the project, excluding .git directory
           rsync -avz --exclude='.git' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $USER@$HOST:/home/ubuntu/app
 
-          # SSH into the server to rebuild containers
+          # SSH into the server to configure Docker Compose and rebuild containers
           ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST "
+            # Ensure Docker Compose is installed
+            DOCKER_COMPOSE_VERSION=2.22.0
+            if ! [ -x \"\$(command -v docker-compose)\" ]; then
+              echo 'Docker Compose not found. Installing...'
+              sudo curl -L \"https://github.com/docker/compose/releases/download/v\$DOCKER_COMPOSE_VERSION/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # Verify Docker Compose installation
+            docker-compose --version
+
+            # Navigate to app directory and rebuild containers
             cd /home/ubuntu/app &&
             docker-compose down &&
             docker-compose up -d --build
