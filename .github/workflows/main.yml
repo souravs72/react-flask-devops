@@ -62,12 +62,8 @@ jobs:
             docker --version
             docker-compose --version
 
-            # Add the current user to the docker group to avoid permission issues
-            sudo usermod -aG docker $USER
-            newgrp docker <<EONG
             # Navigate to app directory and rebuild containers
             cd /home/ubuntu/app &&
-            docker-compose down &&
-            docker-compose up -d --build
-            EONG
+            sudo docker-compose down &&
+            sudo docker-compose up -d --build
           "
