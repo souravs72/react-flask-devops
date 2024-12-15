@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and Push Docker Images
+        run: |
+          docker-compose build
+
+      - name: Deploy to AWS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOST: ${{ secrets.EST_IP }}
+          USER: ubuntu
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem docker-compose.yml ubuntu@$HOST:/home/ubuntu/
+          ssh -i private_key.pem ubuntu@$HOST "
+            cd /home/ubuntu &&
+            docker-compose down &&
+            docker-compose up -d
+          "
