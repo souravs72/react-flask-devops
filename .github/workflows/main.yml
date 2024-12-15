@@ -32,13 +32,14 @@ jobs:
           HOST: ${{ secrets.EC2_HOST_IP }}
           USER: ubuntu
         run: |
+          # Save SSH Private Key to file
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          # Copy the entire project directory
-          scp -o StrictHostKeyChecking=no -i private_key.pem -r . $USER@$HOST:/home/ubuntu/app
+          # Use rsync to copy the project, excluding .git directory
+          rsync -avz --exclude='.git' -e "ssh -i private_key.pem" ./ $USER@$HOST:/home/ubuntu/app
 
-          # SSH into the server and rebuild the containers
+          # SSH into the server to rebuild containers
           ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST "
             cd /home/ubuntu/app &&
             docker-compose down &&
