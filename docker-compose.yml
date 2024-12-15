@@ -2,13 +2,18 @@ version: "3.8"
 
 services:
   frontend:
-    build: ./frontend
-    container_name: react_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vite_frontend
     ports:
-      - "3000:80"
+      - "80:80" # Vite build served through NGINX on port 80
+    restart: always
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: flask_backend
     ports:
       - "5000:5000"
