@@ -37,7 +37,7 @@ jobs:
           chmod 600 private_key.pem
 
           # Use rsync to copy the project, excluding .git directory
-          rsync -avz --exclude='.git' -e "ssh -i private_key.pem" ./ $USER@$HOST:/home/ubuntu/app
+          rsync -avz --exclude='.git' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $USER@$HOST:/home/ubuntu/app
 
           # SSH into the server to rebuild containers
           ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST "
